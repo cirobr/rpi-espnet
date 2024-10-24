@@ -201,9 +201,8 @@ LibCUDA.cleangpu()
 
 
 # model
-function instantiate_model()
+function instantiate_model(α2, α3)
       Random.seed!(1234)   # to enforce reproducibility
-      # return ESPnet(3,C; activation=leakyrelu, alpha2=5, alpha3=8, verbose=false)
       return ESPnet(3,C; activation=leakyrelu, alpha2=α2, alpha3=α3, verbose=false)
 end
 @info "model OK"
@@ -231,11 +230,11 @@ results = DataFrame(
 
 # tuning function
 function objective(trial)
-      @unpack optfn, η, λ = trial
-      @info "objective: optimizer=$optfn, η=$η, λ=$λ, α2=$α2, α3=$α3"
+      @unpack optfn, η, λ, α2, α3 = trial
+      @info "objective: optimizer: opt=$optfn, η=$η, λ=$λ, α2=$α2, α3=$α3"
 
       # model
-      model = instantiate_model() |> gpu   # always with same initial conditions
+      model = instantiate_model(α2, α3) |> gpu   # always with same initial conditions
 
       # check for matching between model and data
       @assert size(model(Xtr)) == size(ytr) || error("model/data features do not match")
@@ -248,9 +247,9 @@ function objective(trial)
       number_since_best = 10
       patience = 5
       es = Flux.early_stopping(()->validloss, number_since_best;
-            init_score = Inf, min_dist = 1.f-4)
+            init_score = Inf)   #, min_dist = 1.f-4)
       pl = Flux.plateau(()->validloss, patience;
-            init_score = Inf, min_dist = 1.f-4)
+            init_score = Inf)   #, min_dist = 1.f-4)
 
 
       ### training
@@ -282,7 +281,7 @@ function objective(trial)
       end
 
       # save partial results
-      push!(results, [string(optfn), η, λ, final_loss])
+      push!(results, [string(optfn), η, λ, α2, α3, final_loss])
       outputfile = script_name[1:end-3] * ".csv"
       CSV.write(outputfile, results)
       
@@ -295,7 +294,7 @@ LibCUDA.cleangpu()
 
 
 ### hyperparameters tuning
-lossfns = [ce3_loss, cosine_loss, Flux.kldivergence, Flux.poisson_loss]
+# lossfns = [ce3_loss, cosine_loss, Flux.kldivergence, Flux.poisson_loss]
 optfns = [Flux.Adam, Flux.RMSProp]
 ηs = [1.e-4, 5.e-4]
 λs = [0.0, 5.e-7, 5.e-5]
@@ -314,13 +313,13 @@ optfns = [Flux.Adam, Flux.RMSProp]
 
 Random.seed!(1234)   # to enforce reproducibility
 scenario = Scenario(
-      lossfn  = lossfns,
+      # lossfn  = lossfns,
       optfn   = optfns,
       η       = ηs,
       λ       = λs,
       α2      = α2s,
       α3      = α3s,
-      max_trials = 3,             # 30 out of 432 combinations
+      max_trials = 30,             # 30 out of 432 combinations
       # sampler = GridSampler(),
       sampler = RandomSampler(),
 )
