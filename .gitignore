@@ -1,0 +1,6 @@
+/Manifest.toml
+.vscode/
+dataset/**/*.png
+dataset/**/*.jpg
+dataset/**/*.jpeg
+models/

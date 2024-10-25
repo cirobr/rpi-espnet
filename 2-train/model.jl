@@ -8,13 +8,13 @@ Date: 20-Oct-2024
 cd(@__DIR__)
 
 ### arguments
-# cudadevice = parse(Int64, ARGS[1])
-# nepochs    = parse(Int64, ARGS[2])
-# debugflag  = parse(Bool,  ARGS[3])
+cudadevice = parse(Int64, ARGS[1])
+nepochs    = parse(Int64, ARGS[2])
+debugflag  = parse(Bool,  ARGS[3])
 
-cudadevice = 0
-nepochs    = 400
-debugflag  = true
+# cudadevice = 0
+# nepochs    = 400
+# debugflag  = true
 
 script_name = basename(@__FILE__)
 @info "script_name: $script_name"
