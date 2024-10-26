@@ -265,9 +265,9 @@ metrics = [
 
 ### tuning
 @info "start tuning ..."
-fpfn = expanduser(modelspath) * "train/bestmodel.jld2"
-LibFluxML.loadModelState!(fpfn, modelcpu)
-model = modelcpu |> gpu
+# fpfn = expanduser(modelspath) * "train/bestmodel.jld2"
+# LibFluxML.loadModelState!(fpfn, modelcpu)
+# model = modelcpu |> gpu
 
 Flux.thaw!(optimizerState)
 Flux.adjust!(optimizerState, η/10)
